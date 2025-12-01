@@ -1,0 +1,238 @@
+cd /proj/snic2022-6-164/MattC/dog_mitonuclear_conflict_project
+
+1u7uhzdyzyuofa7
+
+
+module load bioinfo-tools
+module load bcftools
+
+
+CODE:
+
+
+
+
+New Dog symbols for genes (annotation might have caused troubles when looking for othoslogs and we may have missed some genes):
+
+
+
+Step 0.
+
+Make a coyote.txt containing all the the ids with coyotes from the dog vcf file. 
+
+cat coyote.txt
+CLATUS000001
+CLATUS000002
+CLATUS000003
+CLATUS000004
+
+
+
+
+Step 1. (The guide shows for AutoAndXPAR.SNPs, but repeat it for the ChrX.NONPAR.SNPs aswell)
+Create a bed file (where the New_genes.txt is):
+
+(The New_genes.txt has has a windows format which needs to be addressed in this step.)
+
+
+GTF=../../../genome_annotation/GCF_011100685.1_UU_Cfam_GSD_1.0_genomic.gtf
+NEW_GENES=New_genes.txt
+
+
+awk 'NR==FNR {
+        g = $1
+        sub(/\r$/, "", g)     
+        genes[g] = 1
+        next
+     }
+     $1 ~ /^NC_/ && $3 == "gene" {
+        if (match($0, /gene "([^"]+)"/, m)) {
+            g = m[1]
+            if (g in genes) {
+                start = $4 - 1  
+                end   = $5
+                print $1, start, end, g
+            }
+        }
+     }' "$NEW_GENES" "$GTF" > mito_nuclear_genes_NC.bed
+
+
+Step 2.
+Translate the NC_ names to chr-names (See guide to create translation file below):
+
+awk 'NR==FNR {
+        map[$1] = $2;          
+        next
+     }
+     ($1 in map) {           
+        $1 = map[$1];
+        print;
+     }' chrom_map.txt mito_nuclear_genes_NC.bed > mito_nuclear_genes_chr.bed
+
+
+Step 3.
+Make it properly tabbed:
+
+awk 'BEGIN{OFS="\t"} {print $1,$2,$3,$4}' mito_nuclear_genes_chr.bed \
+  > mito_nuclear_genes_chr_tab.bed
+
+
+This:
+
+head -n 5 mito_nuclear_genes_chr_tab.bed | cat -A
+
+
+Should look like this:
+
+chr1^I660384^I689553^IRBFA$
+
+
+Step 4. 
+
+Move to the where the new vcf file (and the coyote.txt).
+
+VCF=../../../data/ng_VCFs/AutoAndXPAR.SNPs.vcf.vqsr99.gz
+BED=../filter_dog_mito_genes/mito_nuclear_genes_chr_tab.bed
+
+bcftools view -S ^coyote.txt -R "$BED" -Oz "$VCF" -o dog_mitonuclear.noCoyotes.vcf.gz
+
+bcftools index dog_mitonuclear.noCoyotes.vcf.gz
+
+
+bcftools view -S ^coyote.txt -R "$BED" -Oz "$VCF" -o chrx_dog_mitonuclear.noCoyotes.vcf.gz
+
+
+
+TRANSLATION GUIDE:
+
+Translate from NC_ to chr
+
+1.Extract NC names:
+
+cat GCF_011100685.1_UU_Cfam_GSD_1.0_genomic.gtf | awk '{print $1}' | sort -u > gtf_chrs.txt
+
+2. Extract chr names:
+
+bcftools view -h ../../../data/ng_VCFs/AutoAndXPAR.SNPs.vcf.vqsr99.gz | grep
+"##contig" | sed 's/.*ID=//' | sed 's/,length.*//' | sort -u > vcf_chrs.txt
+
+3. Remove extra stuff from the files (this saved only cannonical chromosomes and nto for example mitochondrial and no tiny unplaced scaffolds):
+
+grep '^NC_' gtf_chrs.txt > gtf_main_chrs.txt
+
+grep -E '^chr([0-9]+|X)$' vcf_chrs.txt > vcf_main_chrs.txt
+
+4. Sort the vcf file (chromsome 2 comes after chromosome 19 for some reason):
+
+sort -V vcf_main_chrs.txt > vcf_main_chrs_sorted.txt
+
+Results of both files.
+
+chr1
+chr2
+chr3
+chr4
+chr5
+chr6
+chr7
+chr8
+chr9
+chr10
+chr11
+chr12
+chr13
+chr14
+chr15
+chr16
+chr17
+chr18
+chr19
+chr20
+chr21
+chr22
+chr23
+chr24
+chr25
+chr26
+chr27
+chr28
+chr29
+chr30
+chr31
+chr32
+chr33
+chr34
+chr35
+chr36
+chr37
+chr38
+chrX
+
+NC_049222.1
+NC_049223.1
+NC_049224.1
+NC_049225.1
+NC_049226.1
+NC_049227.1
+NC_049228.1
+NC_049229.1
+NC_049230.1
+NC_049231.1
+NC_049232.1
+NC_049233.1
+NC_049234.1
+NC_049235.1
+NC_049236.1
+NC_049237.1
+NC_049238.1
+NC_049239.1
+NC_049240.1
+NC_049241.1
+NC_049242.1
+NC_049243.1
+NC_049244.1
+NC_049245.1
+NC_049246.1
+NC_049247.1
+NC_049248.1
+NC_049249.1
+NC_049250.1
+NC_049251.1
+NC_049252.1
+NC_049253.1
+NC_049254.1
+NC_049255.1
+NC_049256.1
+NC_049257.1
+NC_049258.1
+NC_049259.1
+NC_049260.1
+
+
+5. Build the mapping table:
+
+paste gtf_main_chrs.txt vcf_main_chrs_sorted.txt > chrom_map.txt
+
+6. Translate the bed file NC -> chr:
+
+awk 'NR==FNR { map[$1] = $2; next } { $1 = map[$1]; print }' chrom_map.txt mito_nuclear_genes_NC.bed > mito_nuclear_genes_final.bed
+
+7. There are spaces instead of tabs so change that (in the bed file):
+
+awk '{print $1"\t"$2"\t"$3"\t"$4}' mito_nuclear_genes_final.bed > mito_nuclear_genes_final_tab.bed
+
+This: head -n 5 mito_nuclear_genes_final_tab.bed | cat -A
+
+Should look like this when it is done:
+
+chr1^I660384^I689553^IRBFA$
+chr1^I5149813^I5156191^ITIMM21$
+...
+
+
+
+
+
+
+
+
