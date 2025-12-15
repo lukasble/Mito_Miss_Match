@@ -1,0 +1,46 @@
+#!/bin/bash
+#SBATCH -A uppmax2025-2-119
+#SBATCH -M rackham
+#SBATCH -p core
+#SBATCH -n 8
+#SBATCH -t 08:00:00
+#SBATCH --job-name=snpeff_mito
+#SBATCH --output=snpeff_mito.out
+#SBATCH --error=snpeff_mito.err
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=sarina.emad.4348@student.uu.se
+
+########################
+# Modules
+########################
+module purge
+module load bioinfo-tools
+module load snpEff/5.2
+
+########################
+# Paths
+########################
+VCF_DIR="/proj/snic2022-6-164/MattC/dog_mitonuclear_conflict_project/Sarina/Results/1_results_raw_files/filtered_PASS"
+OUTDIR="/proj/snic2022-6-164/MattC/dog_mitonuclear_conflict_project/Sarina/Results/8_snpeff_annotated"
+CONFIG="/proj/snic2022-6-164/MattC/dog_mitonuclear_conflict_project/Sarina/snpEff/snpEff.config"
+GENOME="dogMito"
+
+mkdir -p "$OUTDIR"
+
+########################
+# Annotate
+########################
+for vcf in "$VCF_DIR"/*.vcf.gz; do
+    base=$(basename "$vcf" .vcf.gz)
+    echo "Annotating $base"
+
+    snpEff \
+        -c "$CONFIG" \
+        -noStats \
+        -noLog \
+        "$GENOME" \
+        "$vcf" \
+        > "$OUTDIR/${base}.snpeff.vcf"
+done
+
+echo "DONE: snpEff annotation"
