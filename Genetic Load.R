@@ -16,7 +16,8 @@ library(corrplot)
 library(Hmisc)
 library(reshape2)
 
-setwd("")  #Set your working directory
+#Set working directory
+setwd("")
 dataset <- read.csv("damaging_alleles_with_breed.csv")
 syn_breed <- read.csv("syn_per_sample.tsv", sep="\t")
 nonsyn_breed <- read.csv("nonsyn_per_sample.tsv", sep="\t")
@@ -24,11 +25,10 @@ mod_breed <- read.csv("modifier_per_sample.tsv", sep="\t")
 low_breed <- read.csv("low_per_sample.tsv", sep="\t")
 mid_breed <- read.csv("moderate_per_sample.tsv", sep="\t")
 high_breed <- read.csv("high_per_sample.tsv", sep="\t")
-#total_breed <- read.csv("snp_counts_per_sample.tsv", sep="\t")
 count_breed <- read.csv("count_samp.tsv", sep="\t")
 
 #Filling Dataset
-dataset$DamagingAltAlleleCount <- mid_breed$LoadCount+high_breed$LoadCount #Summing count of HIGH and MID impact SNPs per dog sample ID
+dataset$GeneLoad <- mid_breed$LoadCount+high_breed$LoadCount #Summing count of HIGH and MID impact SNPs per dog sample ID
 dataset["SynonymousCounts"] <- syn_breed$SynonymousCounts
 dataset["NonsynonymousCounts"] <- nonsyn_breed$NonSynonymousCounts
 dataset["ModifierCounts"] <- mod_breed$LoadCount
@@ -44,66 +44,53 @@ dataset["ModifierSNPratio"] <- as.numeric(dataset$ModifierCounts)/as.numeric(dat
 dataset["LowSNPratio"] <- as.numeric(dataset$LowCounts)/as.numeric(dataset$TotalSNPs)
 dataset["ModerateSNPratio"] <- as.numeric(dataset$ModerateCounts)/as.numeric(dataset$TotalSNPs)
 dataset["HighSNPratio"] <- as.numeric(dataset$HighCounts)/as.numeric(dataset$TotalSNPs)
+dataset["Weight"] <- as.numeric(dataset$weight_value)
 
-#Average of samples per dog breed and bining dog breed by weight
-#Classifying dog breed by weight
-dataset["Breed_size"] <- ifelse(dataset$weight_value < 5, "Toy",
-                                ifelse(dataset$weight_value < 11, "Small",
-                                       ifelse(dataset$weight_value < 25, "Medium",
-                                              ifelse(dataset$weight_value < 39, "Large",
+#Classifying dog breed by weight class
+dataset["Breed_size"] <- ifelse(dataset$Weight < 5, "Toy",
+                                ifelse(dataset$Weight < 10, "Small",
+                                       ifelse(dataset$Weight < 20, "Medium",
+                                              ifelse(dataset$Weight < 40, "Large",
                                                      "Giant"))))
 
-#Calculate average per breed for each metric (according to breed code) and merge them in a new breed-only set
-breed_means_avg <- dataset %>%
+dataset <- dataset %>%
   filter(!is.na(Breed_size)) %>%    #Filtering rows with breed size value NA
   filter(!grepl("CLUP", breed_code)) %>%   #Filtering rows with wolf data by sample ID code CLUP
-  filter(!grepl("VILL", breed_code)) %>%   #Filtering rows with Asian Village Dog data by sample ID code VILL
-  group_by(breed_code, Breed_size) %>%
-  summarise(
-    Weight = mean(weight_value, na.rm = TRUE),
-    Dmg = mean(DamagingAltAlleleCount, na.rm = TRUE),
-    Syn = mean(SynonymousCounts, na.rm = TRUE),
-    Non = mean(NonsynonymousCounts, na.rm = TRUE),
-    dNdS = mean(dNdS, na.rm = TRUE),
-    Tot = mean(TotalSNPs, na.rm = TRUE),
-    SNPProp = mean(SNPProp, na.rm = TRUE),
-    Modi = mean(ModifierCounts, na.rm = TRUE),
-    Low = mean(LowCounts, na.rm = TRUE),
-    Mode = mean(ModerateCounts, na.rm = TRUE),
-    High = mean(HighCounts, na.rm = TRUE),
-    ModiRatio = mean(ModifierSNPratio, na.rm = TRUE),
-    LowRatio = mean(LowSNPratio, na.rm = TRUE),
-    ModeRatio = mean(ModerateSNPratio, na.rm = TRUE),
-    HighRatio = mean(HighSNPratio, na.rm = TRUE),
-    n_samples = n(),
-    .groups = "drop"
-  )
+  filter(!grepl("VILL", breed_code))       #Filtering rows with Asian Village Dog data by sample ID code VILL
 
-nrow(breed_means_avg) #349 remaining dog breeds
-summary(breed_means_avg) #Summary statistics per dog breed
+#Ordering columns and filtering dataset
+dataset<- dataset[,c(1,3,26,25,18,11,19,12:17,20:24)]
+
+#Total dog sample number and per weight category
+nrow(dataset)  #1602 total dog samples
+nrow(dataset[dataset$Breed_size=="Toy",])
+nrow(dataset[dataset$Breed_size=="Small",])
+nrow(dataset[dataset$Breed_size=="Medium",])
+nrow(dataset[dataset$Breed_size=="Large",])
+nrow(dataset[dataset$Breed_size=="Giant",])
+
+#Metric distributions
 par(mfrow=c(2,2))
-par(cex.lab = 1.2)
+par(cex.lab = 1.8)
 par(cex.axis = 1.6)
-hist(breed_means_avg$Weight, main = "", xlab = "Weights")
-hist(breed_means_avg$Syn, main = "", xlab = "Synonymous Counts")
-hist(breed_means_avg$Non, main = "", xlab = "Nonsynonymous Counts")
-hist(breed_means_avg$dNdS, main = "", xlab = "Total dN/dS Ratio")
+hist(dataset$Weight, main = "", ylab = "", xlab = "Weight (Kg)")
+hist(dataset$SynonymousCounts, main = "", ylab = "",  xlab = "Synonymous Counts")
+hist(dataset$NonsynonymousCounts, main = "", ylab = "",  xlab = "Nonsynonymous Counts")
+hist(dataset$dNdS, main = "", ylab = "",  xlab = "dN/dS Ratio")
 
-#Pearson correlation test 
-cor.test(breed_means_avg$Weight, breed_means_avg$Dmg)
-cor.test(breed_means_avg$Weight, breed_means_avg$Syn)
-cor.test(breed_means_avg$Weight, breed_means_avg$Non)
-cor.test(breed_means_avg$Weight, breed_means_avg$dNdS)
-cor.test(breed_means_avg$Weight, breed_means_avg$Tot)
-cor.test(breed_means_avg$Weight, breed_means_avg$High)
-cor.test(breed_means_avg$Weight, breed_means_avg$LowRatio)
-cor.test(breed_means_avg$Weight, breed_means_avg$ModiRatio)
-cor.test(breed_means_avg$Weight, breed_means_avg$ModeRatio)
-cor.test(breed_means_avg$Weight, breed_means_avg$HighRatio)
+#Pearson correlation test dataset
+cor.test(dataset$Weight, dataset$GeneLoad)
+cor.test(dataset$Weight, dataset$SynonymousCounts)
+cor.test(dataset$Weight, dataset$NonsynonymousCounts)
+cor.test(dataset$Weight, dataset$dNdS)
+cor.test(dataset$Weight, dataset$TotalSNPs)
+cor.test(dataset$Weight, dataset$NonsynonymousCounts)
+cor.test(dataset$Weight, dataset$dNdS)
 
+ncol(dataset)
 #Correlation analysis visualization
 par(mfrow=c(1,1))
-matrix <- cor(breed_means_avg[,c(3:4,7:8,14:17)], method = c("pearson"))
+matrix <- cor(dataset[,c(4:7,14:18)], method = c("pearson"))
 corrplot(matrix,
          method = "circle",
          type = "lower",
@@ -118,32 +105,16 @@ par(mfrow=c(1,2))
 par(cex.main = 2)
 par(cex.lab = 1.2)
 par(cex.axis = 1.6)
-boxplot(Tot ~ Breed_size,
-        data = breed_means_avg,
+boxplot(TotalSNPs ~ Breed_size,
+        data = dataset,
         col = "lightblue",
-        main = "Total Mutations",
+        main = "Total SNPs",
         xlab = "",
         ylab = "",
         outline = TRUE)
 
-boxplot(SNPProp ~ Breed_size,
-        data = breed_means_avg,
-        col = "lightblue",
-        main = "High Effect Mutations",
-        xlab = "",
-        ylab = "",
-        outline = TRUE)
-
-boxplot(Mode ~ Breed_size,
-        data = breed_means_avg,
-        col = "lightblue",
-        main = "Moderate Effect Mutations",
-        xlab = "",
-        ylab = "",
-        outline = TRUE)
-
-boxplot(High ~ Breed_size,
-        data = breed_means_avg,
+boxplot(GeneLoad ~ Breed_size,
+        data = dataset,
         col = "lightblue",
         main = "High Effect Mutations",
         xlab = "",
@@ -152,42 +123,28 @@ boxplot(High ~ Breed_size,
 
 #Scatterplots for trends and fitting linear regression line
 par(mfrow=c(1,2))
-plot(breed_means_avg$Weight, breed_means_avg$Tot,
-     xlab = "Body Weight (kg)",
-     ylab = "Total SNPs",
-     main = "Total SNPs vs Body weight",
+par(cex.main = 2)
+par(cex.lab = 1.2)
+par(cex.axis = 1.6)
+plot(dataset$Weight, dataset$TotalSNPs,
+     xlab = "Weight (kg)",
+     ylab = "",
+     main = "Total SNPs vs Body Weight",
      pch = 19,
      col = "steelblue")
 
-abline(lm(Tot ~ Weight, data = breed_means_avg),
+abline(lm(TotalSNPs ~ Weight, data = dataset),
        col = "red", lwd = 2)
 
-plot(breed_means_avg$Weight, breed_means_avg$SNPProp,
-     xlab = "Body Weight (kg)",
-     ylab = "ynonymous Counts",
-     main = "Syn. SNPs vs Body Weight",
+plot(dataset$Weight, dataset$SNPProp,
+     xlab = "Weight (kg)",
+     ylab = "",
+     main = "Gene Load proportion vs Body Weight",
      pch = 19,
      col = "steelblue")
-abline(lm(SNPProp ~ Weight, data = breed_means_avg),
+abline(lm(SNPProp ~ Weight, data = dataset),
        col = "red", lwd = 2)
 
-plot(breed_means_avg$Weight, breed_means_avg$HighRatio,
-     xlab = "Average Breed Weight",
-     ylab = "Average High Effect SNPs",
-     main = "High Impact Ratio vs Body Weight",
-     pch = 19,
-     col = "steelblue")
-abline(lm(HighRatio ~ Weight, data = breed_means_avg),
-       col = "red", lwd = 2)
-
-plot(breed_means_avg$Weight, breed_means_avg$dNdS,
-     xlab = "Avg Breed Weight",
-     ylab = "Avg dNdS ratio",
-     main = "dN/dS Ratio vs Body Weight",
-     pch = 19,
-     col = "steelblue")
-abline(lm(dNdS ~ Weight, data = breed_means_avg),
-       col = "red", lwd = 2)
 
 #PCA plot - dimensionality reduction to find predictors that drive most variation in data - excluding the Weight
 pca <- prcomp(breed_means_avg[4:16], scale = TRUE)
