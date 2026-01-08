@@ -6,11 +6,8 @@ This repository contains all code used for the study. Below, the files belonging
 
 ## Heteroplasmy Analysis
 
-*(Add the scripts and files relevant to heteroplasmy analysis here. Example placeholders:)*
 
-- [`heteroplasmy_pipeline.sh`](./heteroplasmy_pipeline.sh) – Main pipeline to call mitochondrial variants.  
-- [`filter_heteroplasmy.py`](./filter_heteroplasmy.py) – Script to filter heteroplasmic sites.  
-- [`plot_heteroplasmy_distribution.R`](./plot_heteroplasmy_distribution.R) – Generates plots of heteroplasmy levels across samples.  
+
 
 ---
 
