@@ -1,14 +1,13 @@
 #!/bin/bash
-#SBATCH -A uppmax2025-2-452      # active project
-#SBATCH -p pelle                  # valid partition
-#SBATCH -M pelle                  # cluster
-#SBATCH -n 8                      # number of cores
-#SBATCH -t 12:00:00               # walltime
-#SBATCH -J mito_filtered          # job name
-#SBATCH -o mito_filter_%j.out     # stdout
-#SBATCH -e mito_filter_%j.err     # stderr
-#SBATCH --array=1-1972            # array jobs for all files
-
+#SBATCH -A uppmax2025-2-452     
+#SBATCH -p pelle                  
+#SBATCH -M pelle                  
+#SBATCH -n 1                   
+#SBATCH -t 12:00:00              
+#SBATCH -J mito_filtered          
+#SBATCH -o mito_filter_%j.out     
+#SBATCH -e mito_filter_%j.err     
+#SBATCH --array=1-1972            
 
 # ------------------------
 # Downloading needed modules
