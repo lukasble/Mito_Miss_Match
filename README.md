@@ -6,8 +6,12 @@ This repository contains all code used for the study. Below, the files belonging
 
 ## Heteroplasmy Analysis
 
-
-
+- **Filtering to only keep variants that have passed QC:** [`filtering_mito_VCFs.sh`](./filtering_mito_VCFs.sh)  
+- **Filtering with initial threshold 4%:** [`4_threshold_heteroplasmy.sh`](./4_threshold_heteroplasmy.sh)  
+- **Listing all samples with the heteroplasmy count:** [`4_listing_heteroplasmy.sh`](./4_listing_heteroplasmy.sh)  
+- **Listing and plotting histogram (same code, different thresholds):**  
+  - [`listing_plotting_heteroplasmy.py`](./listing_plotting_heteroplasmy.py)  
+  - [`listing_plotting_heteroplasmy.sh`](./listing_plotting_heteroplasmy.sh)  
 
 ---
 
