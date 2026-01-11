@@ -39,6 +39,7 @@ dataset["TotalSNPs"] <- count_breed$snp_count
 
 #Calculating and adding ratios to dataset
 dataset["dNdS"] <- as.numeric(dataset$NonsynonymousCounts)/as.numeric(dataset$SynonymousCounts)
+dataset["GeneLoadProp"] <- as.numeric(dataset$GeneLoad)/as.numeric(dataset$TotalSNPs)
 dataset["SNPProp"] <- as.numeric(dataset$TotalSNPs)/801164
 dataset["ModifierSNPratio"] <- as.numeric(dataset$ModifierCounts)/as.numeric(dataset$TotalSNPs)
 dataset["LowSNPratio"] <- as.numeric(dataset$LowCounts)/as.numeric(dataset$TotalSNPs)
@@ -59,7 +60,7 @@ dataset <- dataset %>%
   filter(!grepl("VILL", breed_code))       #Filtering rows with Asian Village Dog data by sample ID code VILL
 
 #Ordering columns and filtering dataset
-dataset<- dataset[,c(1,3,26,25,18,11,19,12:17,20:24)]
+dataset<- dataset[,c(1,3,27,26,18,11,21,20,12,13,19, 14:17,22:25)]
 
 #Total dog sample number and per weight category
 nrow(dataset)  #1602 total dog samples
@@ -91,18 +92,20 @@ hist(dataset$dNdS,
 grid()
 
 #Pearson correlation test dataset
-cor.test(dataset$Weight, dataset$GeneLoad)
-cor.test(dataset$Weight, dataset$SynonymousCounts)
-cor.test(dataset$Weight, dataset$NonsynonymousCounts)
-cor.test(dataset$Weight, dataset$dNdS)
 cor.test(dataset$Weight, dataset$TotalSNPs)
-cor.test(dataset$Weight, dataset$NonsynonymousCounts)
+cor.test(dataset$Weight, dataset$GeneLoad)
+cor.test(dataset$Weight, dataset$GeneLoadProp)
 cor.test(dataset$Weight, dataset$dNdS)
+cor.test(dataset$Weight, dataset$SNPProp)
+cor.test(dataset$Weight, dataset$ModifierSNPratio)
+cor.test(dataset$Weight, dataset$LowSNPratio)
+cor.test(dataset$Weight, dataset$ModerateSNPratio)
+cor.test(dataset$Weight, dataset$HighSNPratio)
 
 ncol(dataset)
 #Correlation analysis visualization
 par(mfrow=c(1,1))
-matrix <- cor(dataset[,c(4:7,14:18)], method = c("pearson"))
+matrix <- cor(dataset[,c(4:8,14:18)], method = c("pearson"))
 corrplot(matrix,
          method = "circle",
          type = "lower",
