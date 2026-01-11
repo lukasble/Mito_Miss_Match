@@ -73,10 +73,22 @@ nrow(dataset[dataset$Breed_size=="Giant",])
 par(mfrow=c(2,2))
 par(cex.lab = 1.8)
 par(cex.axis = 1.6)
-hist(dataset$Weight, main = "", ylab = "", xlab = "Weight (Kg)")
-hist(dataset$SynonymousCounts, main = "", ylab = "",  xlab = "Synonymous Counts")
-hist(dataset$NonsynonymousCounts, main = "", ylab = "",  xlab = "Nonsynonymous Counts")
-hist(dataset$dNdS, main = "", ylab = "",  xlab = "dN/dS Ratio")
+hist(dataset$Weight,
+     main = "", ylab = "", xlab = "Weight (Kg)", 
+     col="lightblue", ylim = c(0,250))
+grid()
+hist(dataset$SynonymousCounts, 
+     main = "", ylab = "",  xlab = "Synonymous SNPs", 
+     col="lightblue", ylim = c(0,1000))
+grid()
+hist(dataset$NonsynonymousCounts, 
+     main = "", ylab = "",  xlab = "Nonsynonymous SNPs", 
+     col="lightblue", ylim = c(0,1300))
+grid()
+hist(dataset$dNdS, 
+     main = "", ylab = "",  xlab = "dN/dS SNP Ratio", 
+     col="lightblue", ylim = c(0,850))
+grid()
 
 #Pearson correlation test dataset
 cor.test(dataset$Weight, dataset$GeneLoad)
@@ -112,6 +124,7 @@ boxplot(TotalSNPs ~ Breed_size,
         xlab = "",
         ylab = "",
         outline = TRUE)
+grid()
 
 boxplot(GeneLoad ~ Breed_size,
         data = dataset,
@@ -120,6 +133,7 @@ boxplot(GeneLoad ~ Breed_size,
         xlab = "",
         ylab = "",
         outline = TRUE)
+grid()
 
 #Scatterplots for trends and fitting linear regression line
 par(mfrow=c(1,2))
