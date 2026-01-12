@@ -38,7 +38,7 @@ dataset["HighCounts"] <- high_breed$LoadCount
 dataset["TotalSNPs"] <- count_breed$snp_count
 
 #Calculating and adding ratios to dataset
-dataset["dNdS"] <- as.numeric(dataset$NonsynonymousCounts)/as.numeric(dataset$SynonymousCounts)
+dataset["NS_Ratio"] <- as.numeric(dataset$NonsynonymousCounts)/as.numeric(dataset$SynonymousCounts)
 dataset["GeneLoadProp"] <- as.numeric(dataset$GeneLoad)/as.numeric(dataset$TotalSNPs)
 dataset["SNPProp"] <- as.numeric(dataset$TotalSNPs)/801164
 dataset["ModifierSNPratio"] <- as.numeric(dataset$ModifierCounts)/as.numeric(dataset$TotalSNPs)
@@ -75,19 +75,19 @@ par(mfrow=c(2,2))
 par(cex.lab = 1.8)
 par(cex.axis = 1.6)
 hist(dataset$Weight,
-     main = "", ylab = "", xlab = "Weight (Kg)", 
+     main = "", ylab = "Number of individuals", xlab = "Weight (Kg)", 
      col="lightblue", ylim = c(0,250))
 grid()
 hist(dataset$SynonymousCounts, 
-     main = "", ylab = "",  xlab = "Synonymous SNPs", 
+     main = "", ylab = "Number of individuals", xlab = "Synonymous SNP Count", 
      col="lightblue", ylim = c(0,1000))
 grid()
 hist(dataset$NonsynonymousCounts, 
-     main = "", ylab = "",  xlab = "Nonsynonymous SNPs", 
+     main = "", ylab = "Number of individuals",  xlab = "Nonsynonymous SNP Count", 
      col="lightblue", ylim = c(0,1300))
 grid()
-hist(dataset$dNdS, 
-     main = "", ylab = "",  xlab = "dN/dS SNP Ratio", 
+hist(dataset$NS_Ratio, 
+     main = "", ylab = "Number of individuals",  xlab = "Nonsyn./Syn. Ratio", 
      col="lightblue", ylim = c(0,850))
 grid()
 
@@ -125,16 +125,16 @@ boxplot(TotalSNPs ~ Breed_size,
         col = "lightblue",
         main = "Total SNPs",
         xlab = "",
-        ylab = "",
+        ylab = "Number of Variants",
         outline = TRUE)
 grid()
 
 boxplot(GeneLoad ~ Breed_size,
         data = dataset,
         col = "lightblue",
-        main = "High Effect Mutations",
+        main = "Genetic Load",
         xlab = "",
-        ylab = "",
+        ylab = "Proportion",
         outline = TRUE)
 grid()
 
@@ -146,21 +146,23 @@ par(cex.axis = 1.6)
 plot(dataset$Weight, dataset$TotalSNPs,
      xlab = "Weight (kg)",
      ylab = "",
-     main = "Total SNPs vs Body Weight",
+     main = "Total SNP Number vs Body Weight",
      pch = 19,
      col = "steelblue")
 
 abline(lm(TotalSNPs ~ Weight, data = dataset),
        col = "red", lwd = 2)
+grid()
 
-plot(dataset$Weight, dataset$SNPProp,
+plot(dataset$Weight, dataset$GeneLoadProp,
      xlab = "Weight (kg)",
      ylab = "",
      main = "Gene Load proportion vs Body Weight",
      pch = 19,
      col = "steelblue")
-abline(lm(SNPProp ~ Weight, data = dataset),
+abline(lm(GeneLoadProp ~ Weight, data = dataset),
        col = "red", lwd = 2)
+grid()
 
 
 #PCA plot - dimensionality reduction to find predictors that drive most variation in data - excluding the Weight
