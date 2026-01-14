@@ -10,7 +10,6 @@ library(factoextra)
 library(tidyverse)
 library(ggplot2)
 library(BioWorldR)
-library(ggplot2)
 library(dplyr)
 library(corrplot)
 library(Hmisc)
@@ -28,7 +27,7 @@ high_breed <- read.csv("high_per_sample.tsv", sep="\t")
 count_breed <- read.csv("count_samp.tsv", sep="\t")
 
 #Filling Dataset
-dataset$GeneLoad <- mid_breed$LoadCount+high_breed$LoadCount #Summing count of HIGH and MID impact SNPs per dog sample ID
+dataset$GeneticLoad <- mid_breed$LoadCount+high_breed$LoadCount #Summing count of HIGH and MID impact SNPs per dog sample ID
 dataset["SynonymousCounts"] <- syn_breed$SynonymousCounts
 dataset["NonsynonymousCounts"] <- nonsyn_breed$NonSynonymousCounts
 dataset["ModifierCounts"] <- mod_breed$LoadCount
@@ -39,12 +38,12 @@ dataset["TotalSNPs"] <- count_breed$snp_count
 
 #Calculating and adding ratios to dataset
 dataset["NS_Ratio"] <- as.numeric(dataset$NonsynonymousCounts)/as.numeric(dataset$SynonymousCounts)
-dataset["GeneLoadProp"] <- as.numeric(dataset$GeneLoad)/as.numeric(dataset$TotalSNPs)
-dataset["SNPProp"] <- as.numeric(dataset$TotalSNPs)/801164
-dataset["ModifierSNPratio"] <- as.numeric(dataset$ModifierCounts)/as.numeric(dataset$TotalSNPs)
-dataset["LowSNPratio"] <- as.numeric(dataset$LowCounts)/as.numeric(dataset$TotalSNPs)
-dataset["ModerateSNPratio"] <- as.numeric(dataset$ModerateCounts)/as.numeric(dataset$TotalSNPs)
-dataset["HighSNPratio"] <- as.numeric(dataset$HighCounts)/as.numeric(dataset$TotalSNPs)
+dataset["GeneticLoadRatio"] <- as.numeric(dataset$GeneticLoad)/as.numeric(dataset$TotalSNPs)
+dataset["SNP_Ratio"] <- as.numeric(dataset$TotalSNPs)/801164
+dataset["ModifierRatio"] <- as.numeric(dataset$ModifierCounts)/as.numeric(dataset$TotalSNPs)
+dataset["LowRatio"] <- as.numeric(dataset$LowCounts)/as.numeric(dataset$TotalSNPs)
+dataset["ModerateRatio"] <- as.numeric(dataset$ModerateCounts)/as.numeric(dataset$TotalSNPs)
+dataset["HighRatio"] <- as.numeric(dataset$HighCounts)/as.numeric(dataset$TotalSNPs)
 dataset["Weight"] <- as.numeric(dataset$weight_value)
 
 #Classifying dog breed by weight class
@@ -93,19 +92,18 @@ grid()
 
 #Pearson correlation test dataset
 cor.test(dataset$Weight, dataset$TotalSNPs)
-cor.test(dataset$Weight, dataset$GeneLoad)
-cor.test(dataset$Weight, dataset$GeneLoadProp)
-cor.test(dataset$Weight, dataset$dNdS)
-cor.test(dataset$Weight, dataset$SNPProp)
-cor.test(dataset$Weight, dataset$ModifierSNPratio)
-cor.test(dataset$Weight, dataset$LowSNPratio)
-cor.test(dataset$Weight, dataset$ModerateSNPratio)
-cor.test(dataset$Weight, dataset$HighSNPratio)
+cor.test(dataset$Weight, dataset$GeneticLoad)
+cor.test(dataset$Weight, dataset$GeneticLoadRatio)
+cor.test(dataset$Weight, dataset$NS_Ratio)
+cor.test(dataset$Weight, dataset$ModifierRatio)
+cor.test(dataset$Weight, dataset$LowRatio)
+cor.test(dataset$Weight, dataset$ModerateRatio)
+cor.test(dataset$Weight, dataset$HighRatio)
 
 ncol(dataset)
 #Correlation analysis visualization
 par(mfrow=c(1,1))
-matrix <- cor(dataset[,c(4:8,14:18)], method = c("pearson"))
+matrix <- cor(dataset[,c(4:6,8,11,16:19)], method = c("pearson"))
 corrplot(matrix,
          method = "circle",
          type = "lower",
@@ -123,47 +121,107 @@ par(cex.axis = 1.6)
 boxplot(TotalSNPs ~ Breed_size,
         data = dataset,
         col = "lightblue",
-        main = "Total SNPs",
+        main = "Total SNP Number across size classes",
         xlab = "",
-        ylab = "Number of Variants",
+        ylab = "Count",
         outline = TRUE)
 grid()
 
-boxplot(GeneLoad ~ Breed_size,
+boxplot(GeneticLoadRatio ~ Breed_size,
         data = dataset,
         col = "lightblue",
-        main = "Genetic Load",
+        main = "Genetic Load Proportion across size classes",
         xlab = "",
         ylab = "Proportion",
         outline = TRUE)
 grid()
 
-#Scatterplots for trends and fitting linear regression line
+
+#Scatter plots for visualization of data dispersion and fitting of linear regression model
 par(mfrow=c(1,2))
 par(cex.main = 2)
-par(cex.lab = 1.2)
+par(cex.lab = 1.6)
 par(cex.axis = 1.6)
+
+#Total SNP count
+model <- lm(TotalSNPs ~ Weight, data = dataset)
+xlim <- range(dataset$Weight)
+ylim <- range(dataset$TotalSNPs)
+
+x_pos <- xlim[1] + 0.7 * diff(xlim)
+y_pos <- ylim[1] + 0.5 * diff(ylim)
+
+eqn <- bquote(
+  italic(y) == .(round(coef(model)[1], 2)) +
+    .(round(coef(model)[2], 2)) %.% italic(x)
+)
+
+stats <- bquote(
+  R^2 == .(round(summary(model)$r.squared, 3)) * "," ~
+    italic(p) == .(signif(summary(model)$coefficients[2, 4], 3))
+)
 plot(dataset$Weight, dataset$TotalSNPs,
      xlab = "Weight (kg)",
-     ylab = "",
+     ylab = "Count",
      main = "Total SNP Number vs Body Weight",
      pch = 19,
      col = "steelblue")
 
-abline(lm(TotalSNPs ~ Weight, data = dataset),
-       col = "red", lwd = 2)
+abline(model, col = "red", lwd = 2)
+text(x = x_pos,
+     y = y_pos,
+     labels = as.expression(eqn),
+     pos = 4,
+     cex =1.3,
+     col = "black")
+
+text(x = x_pos,
+     y = y_pos - diff(range(dataset$TotalSNPs)) * 0.035,
+     labels = as.expression(stats),
+     pos = 4,
+     cex =1.3,
+     col = "black")
 grid()
 
-plot(dataset$Weight, dataset$GeneLoadProp,
+#Genetic Load Ratio
+model <- lm(GeneticLoadRatio ~ Weight, data = dataset)
+xlim <- range(dataset$Weight)
+ylim <- range(dataset$GeneticLoadRatio)
+
+x_pos <- xlim[1] + 0.7 * diff(xlim)
+y_pos <- ylim[1] + 0.45 * diff(ylim)
+
+eqn <- bquote(
+  italic(y) == .(round(coef(model)[1], 2)) +
+    .(round(coef(model)[2], 6)) %.% italic(x)
+)
+
+stats <- bquote(
+  R^2 == .(round(summary(model)$r.squared, 3)) * "," ~
+    italic(p) == .(signif(summary(model)$coefficients[2, 4], 3))
+)
+
+plot(dataset$Weight, dataset$GeneticLoadRatio,
      xlab = "Weight (kg)",
-     ylab = "",
-     main = "Gene Load proportion vs Body Weight",
+     ylab = "Proportion",
+     main = "Genetic Load Proportion vs Body Weight",
      pch = 19,
      col = "steelblue")
-abline(lm(GeneLoadProp ~ Weight, data = dataset),
-       col = "red", lwd = 2)
-grid()
+abline(model, col = "red", lwd = 2)
+text(x = x_pos,
+     y = y_pos,
+     labels = as.expression(eqn),
+     pos = 4,
+     cex =1.3,
+     col = "black")
 
+text(x = x_pos,
+     y = y_pos - diff(range(dataset$GeneticLoadRatio)) * 0.035,
+     labels = as.expression(stats),
+     pos = 4,
+     cex =1.3,
+     col = "black")
+grid()
 
 #PCA plot - dimensionality reduction to find predictors that drive most variation in data - excluding the Weight
 pca <- prcomp(breed_means_avg[4:16], scale = TRUE)
