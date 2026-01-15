@@ -30,6 +30,17 @@ This repository contains all code used for the study. Below, the files belonging
     
 ## Mito-Nuclear Genetic Load
 
+### Core Genetic Load Pipeline
+
 - **Build target region + subset VCF:** [`vcf_filtering_translation.txt`](./vcf_filtering_translation.txt)  
-- **Subsetting genome-wide VCF to mito-nuclear gene regions (excluding coyotes):** [`run_bcftools.sh`](./run_bcftools.sh)
-- 
+- **Subsetting genome-wide VCF to mito-nuclear gene regions (excluding coyotes):** [`bcftools.sh`](./bcftools.sh)
+- **Subsetting ChrX (non-PAR) VCF to mito-nuclear genes (excluding coyotes):** [`bcftools_chrx.sh`](./bcftools_chrx.sh)
+- **Annotating mito-nuclear subset VCFs with snpEff (autosomes + XPAR and ChrX NONPAR):** [`annotate_mito_vcfs.sh`](./annotate_mito_vcfs.sh)
+- **Extracting damaging mito-nuclear variants and generating genotype tables:** [`genetic_load.sh`](./genetic_load.sh) 
+- **Computing per-sample genetic load from damaging variant genotypes:** [`genetic_load_python.sh`](./genetic_load_python.sh)
+
+### Pathway- and Variant-Level Analyses
+
+- **Pathway-level genetic load analyses:** …
+- **Synonymous vs non-synonymous variant ratio analyses:** …
+- **Impact-stratified and gene-set-specific analyses:** …
