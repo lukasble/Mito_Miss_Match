@@ -40,7 +40,6 @@ snpEff -c "$CONFIG_DB" -dataDir "$DIR_DB" -v "$ID_DB" -csvStats "$OUTPUT" "$CHRX
 
 bcftools index --threads 8 -f "$OUTPUT/chrx_annotation.vcf.gz"
 
-# ---- quick sanity checks ----
 echo "Main VCF sample count:"
 bcftools query -l "$OUTPUT/auto_annotation.vcf.gz" | wc -l
 
