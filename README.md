@@ -24,4 +24,10 @@ This repository contains all code used for the study. Below, the files belonging
   - [`plot_geneticload_vs_weights.sh`](./plot_geneticload_vs_weights.sh)  
 - **Plotting deleterious variants in three categories:**  
   - [`plot_groups_mito_geneticload.py`](./plot_groups_mito_geneticload.py)  
-  - [`plot_groups_mito_geneticload.sh`](./plot_groups_mito_geneticload.sh)  
+  - [`plot_groups_mito_geneticload.sh`](./plot_groups_mito_geneticload.sh)
+
+---
+    
+## Mito-Nuclear Genetic Load
+
+- **Build target region + subset VCF:** [`vcf_filtering_translation.txt`](./vcf_filtering_translation.txt)  
