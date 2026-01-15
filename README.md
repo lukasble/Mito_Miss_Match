@@ -31,3 +31,5 @@ This repository contains all code used for the study. Below, the files belonging
 ## Mito-Nuclear Genetic Load
 
 - **Build target region + subset VCF:** [`vcf_filtering_translation.txt`](./vcf_filtering_translation.txt)  
+- **Subsetting genome-wide VCF to mito-nuclear gene regions (excluding coyotes):** [`run_bcftools.sh`](./run_bcftools.sh)
+- 
