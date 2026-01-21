@@ -39,8 +39,15 @@ This repository contains all code used for the study. Below, the files belonging
 - **Extracting damaging mito-nuclear variants and generating genotype tables:** [`genetic_load.sh`](./genetic_load.sh) 
 - **Computing per-sample genetic load from damaging variant genotypes:** [`genetic_load_python.sh`](./genetic_load_python.sh)
 
-### Pathway- and Variant-Level Analyses
+### Core Pathway-level Analysis and Data Examination:
 
-- **Pathway-level genetic load analyses:** …
-- **Synonymous vs non-synonymous variant ratio analyses:** …
-- **Impact-stratified and gene-set-specific analyses:** …
+- **Annotation of VCF file for Nuclear Autosome + Chrx-NonPar SNPs:** annotation_SNPeff.sh
+- **Pathway-level genetic load analyses:** [`vcf_filtering_translation.txt`](./vcf_filtering_translation.txt)  
+- **Filtering of annotated VCF files, data extraction and conversion (General Impact, Synonymous and Nonsynonymous Variant Analysis):**
+  - **Data Extraction**:
+    - [`syn_extract.sh`](./syn_extract.sh)
+    - [`nonsyn_extract.sh`](./nonsyn_extract.sh)
+  - **Data Conversion**:
+    - [`syn_extract.sh`](./syn_extract.sh)
+    - [`nonsyn_extract.sh`](./nonsyn_extract.sh)
+- **Data Analysis and Visualization study of genetic variation and genetic load metrics:** [`genetic_load.sh`](./genetic_load.sh)
