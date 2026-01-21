@@ -41,13 +41,15 @@ This repository contains all code used for the study. Below, the files belonging
 
 ### Core Pathway-level Analysis and Data Examination:
 
-- **Annotation of VCF file for Nuclear Autosome + Chrx-NonPar SNPs:** annotation_SNPeff.sh
-- **Pathway-level genetic load analyses:** [`vcf_filtering_translation.txt`](./vcf_filtering_translation.txt)  
-- **Filtering of annotated VCF files, data extraction and conversion (General Impact, Synonymous and Nonsynonymous Variant Analysis):**
-  - **Data Extraction**:
-    - [`syn_extract.sh`](./syn_extract.sh)
-    - [`nonsyn_extract.sh`](./nonsyn_extract.sh)
-  - **Data Conversion**:
-    - [`syn_extract.sh`](./syn_extract.sh)
-    - [`nonsyn_extract.sh`](./nonsyn_extract.sh)
+- **Annotation of VCF file for Nuclear Autosome + Chrx-NonPar SNPs:** [`annotation_SNPeff.sh`](./annotation_SNPeff.sh)  
+- **Pathway-level genetic load analyses:**
+  - **Filtering annotated VCF files, data extraction and conversion - General Impact, Synonymous and Nonsynonymous Variant Analysis:**
+    - **Data Extraction**:
+      - [`general_impact_extract.sh`](./general_impact_extract.sh)
+      - [`syn_extract.sh`](./syn_extract.sh)
+      - [`nonsyn_extract.sh`](./nonsyn_extract.sh)
+    - **Data Conversion**:
+      - [`data_conversion_impact.sh`](./data_conversion_impact.sh)
+      - [`syn_extract.sh`](./syn_extract.sh)
+      - [`data_conversion_nonsyn.sh`](./data_conversion_nonsyn.sh)
 - **Data Analysis and Visualization study of genetic variation and genetic load metrics:** [`genetic_load.sh`](./genetic_load.sh)
